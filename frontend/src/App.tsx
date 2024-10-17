@@ -14,7 +14,7 @@ const theme = extendTheme({
 });
 
 function App() {
-  const [csvData, setCsvData] = useState("");
+  const [csvData, setCsvData] = useState<{ oldCSV: string, newCSV: string } | null>(null);
   return (
     <ChakraProvider theme={theme}>
       <Box
@@ -36,7 +36,8 @@ function App() {
           {csvData && (
             <>
               <Text>Nice work bud. Now download it!</Text>
-              <DownloadLink data={csvData} />
+              <DownloadLink data={csvData.oldCSV} fileName={`ivy_list_${new Date().toLocaleDateString()}.csv`} text={"Download Traditional"}/>
+              <DownloadLink data={csvData.newCSV} fileName={`NEW_ivy_list_${new Date().toLocaleDateString()}.csv`} text={"Download New"}/>
             </>
           )}
           <Text fontStyle="italic">-Pierce</Text>

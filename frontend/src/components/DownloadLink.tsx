@@ -5,9 +5,11 @@ const DownloadLink = ({
   fileName = `ivy-list-${new Date().getFullYear()}-${
     new Date().getMonth() + 1
   }-${new Date().getDate()}.csv`,
+  text
 }: {
   data: string;
   fileName?: string;
+  text: string;
 }) => {
   const handleDownload = async () => {
     const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
@@ -21,7 +23,7 @@ const DownloadLink = ({
 
   return (
     <Button onClick={handleDownload} colorScheme="blue">
-      Download
+      {text}
     </Button>
   );
 };

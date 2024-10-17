@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Button, Input, VStack } from "@chakra-ui/react";
 import { transformAndGenerateCSV } from "../utils/DataTransformer";
 import Papa from "papaparse";
@@ -7,9 +7,10 @@ import { read, utils } from 'xlsx';
 const FileUploader = ({
   onFileProcessed,
 }: {
-  onFileProcessed: (data: string) => void;
+  onFileProcessed: (data: { oldCSV: string, newCSV: string }) => void;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [csvData, setCsvData] = useState<{ oldCSV: string; newCSV: string } | null>(null);
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -32,8 +33,9 @@ const FileUploader = ({
         Papa.parse(csv, {
           complete: async (results: any) => {
             console.log("results", results);
-            const data = await transformAndGenerateCSV(results.data);
-            onFileProcessed(data);
+            const { oldCSV, newCSV } = await transformAndGenerateCSV(results.data);
+            setCsvData({ oldCSV, newCSV });
+            onFileProcessed({ oldCSV, newCSV });
           },
           header: true,
         });
