@@ -1,6 +1,4 @@
 import Papa from "papaparse";
-import "../rosters/2025_roster.xlsx"
-import { members } from "./utils";
 
 interface Person {
   firstName: string;
