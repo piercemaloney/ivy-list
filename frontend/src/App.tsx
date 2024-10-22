@@ -26,7 +26,7 @@ function App() {
         height="100vh"
       >
         <VStack spacing={4}>
-          <Text fontSize="4xl">Hey Cole!</Text>
+          <Text fontSize="4xl">Cole, my venmo is @Jaehee-Ashley</Text>
           {!csvData && (
             <>
               <Text>Upload the Excel list here.</Text>
