@@ -41,14 +41,6 @@ function transformAndGenerateCSV(data: any[]): { oldCSV: string; newCSV: string 
 function transformPersonsIntoNewCSV(data: Person[]): string {
   // Group data by member name
   const memberDict: {[key: string]: string[]} = {};
-
-  const aikoData = data.find(p => p.memberName && p.memberName.includes("Aiko"));
-  if (aikoData) {
-    console.log("Aiko's data:", aikoData);
-    console.log("Guest 3:", aikoData.guestThree);
-    console.log("Guest 4:", aikoData.guestFour);
-    console.log("Guest 5:", aikoData.guestFive);
-  }
   
   // Iterate through all persons in the data
   data.forEach((person) => {
