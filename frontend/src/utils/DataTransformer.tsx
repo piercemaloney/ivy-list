@@ -1,18 +1,34 @@
 import Papa from "papaparse";
 
 interface Person {
-  firstName: string;
-  lastName: string;
-  invitedBy: string | null; // null for members
+  memberName: string;
+  guestOne: string;
+  guestTwo: string | null; // null for some
+  guestThree: string | null;
+  guestFour: string | null;
+  guestFive: string | null;
+  guestSix: string | null;
+  guestSeven: string | null;
+  guestEight: string | null;
+  guestNine: string | null;
+  guestTen: string | null;
 }
 
 function transformAndGenerateCSV(data: any[]): { oldCSV: string; newCSV: string } {
   // Transform data
   const transformedData = data.map((item: any) => {
     return {
-      firstName: item["First Name"],
-      lastName: item["Last Name"],
-      invitedBy: item["Invited By"],
+      memberName: item["Member Name (First and Last)"],
+      guestOne: item["Guest 1 Name (First and Last)"],
+      guestTwo: item["Guest 2 Name (First and Last)"],
+      guestThree: item["Guest 3 Name (First and Last)"],
+      guestFour: item["Guest 4 Name (First and Last)"],
+      guestFive: item["Guest 5 Name (First and Last)"],
+      guestSix: item["Guest 6 Name (First and Last)"],
+      guestSeven: item["Guest 7 Name (First and Last)"],
+      guestEight: item["Guest 8 Name (First and Last)"],
+      guestNine: item["Guest 9 Name (First and Last)"],
+      guestTen: item["Guest 10 Name (First and Last)"],
     };
   });
 
@@ -23,104 +39,132 @@ function transformAndGenerateCSV(data: any[]): { oldCSV: string; newCSV: string 
 }
 
 function transformPersonsIntoNewCSV(data: Person[]): string {
-  // sort by member last name!
+  // Group data by member name
   const memberDict: {[key: string]: string[]} = {};
-  data
-  .filter((person)=>person.invitedBy!=='n/a')
-  .map((person)=>{
-    const split = (person.invitedBy) ? person.invitedBy.split(' ') : ''
-    const memberName = (split.length==2)? split[0] + " " + split[1]:split[0];
-    const guestName = person.firstName + " " + person.lastName;
-    // If the memberName exists, append the new guest to the array
-    if (person.invitedBy) {
-      if (memberDict[memberName]) {
-        memberDict[memberName].push(guestName);
-      } else {
-        // Otherwise, create a new array for the first guest
-        memberDict[memberName] = [guestName];
+
+  const aikoData = data.find(p => p.memberName && p.memberName.includes("Aiko"));
+  if (aikoData) {
+    console.log("Aiko's data:", aikoData);
+    console.log("Guest 3:", aikoData.guestThree);
+    console.log("Guest 4:", aikoData.guestFour);
+    console.log("Guest 5:", aikoData.guestFive);
+  }
+  
+  // Iterate through all persons in the data
+  data.forEach((person) => {
+    if (!person.memberName) return;
+    
+    // Normalize member name (handle first and last name)
+    const memberNameSplit = person.memberName.split(' ');
+    const memberName = memberNameSplit.length === 2 
+      ? memberNameSplit[0] + " " + memberNameSplit[1] 
+      : memberNameSplit[0];
+    
+    if (!memberDict[memberName]) {
+      memberDict[memberName] = [];
+    }
+    const guestFields = [
+      person.guestOne,
+      person.guestTwo,
+      person.guestThree,
+      person.guestFour,
+      person.guestFive,
+      person.guestSix,
+      person.guestSeven,
+      person.guestEight,
+      person.guestNine,
+      person.guestTen
+    ];
+    
+    guestFields.forEach((guest) => {
+      if (guest) {
+        const guestSplit = guest.split(' ');
+        const guestName = guestSplit.length >= 2 
+          ? guestSplit[0] + " " + guestSplit.slice(1).join(' ') 
+          : guestSplit[0] || '';
+        
+        if (guestName) {
+          memberDict[memberName].push(guestName);
+        }
       }
-    }
-
-    console.log('memberdict', memberDict)
-  })
-
-  // const sortedData = data.sort((a, b)=>{
-  //   const splitName = 
-  // })
-  const transformedData = [];
-  transformedData.push(["Last Name", "First Name", "GUEST #1", "GUEST #2"]);
-  Object.entries(memberDict)
-  .sort(([memberNameA], [memberNameB]) => {
-    // Split the member names to get the last names
-    const lastNameA = memberNameA.split(" ").slice(-1)[0]; // Get the last name from memberNameA
-    const lastNameB = memberNameB.split(" ").slice(-1)[0]; // Get the last name from memberNameB
-
-    // Compare the last names for sorting
-    // If last name A is empty, it should come after last name B
-    if (lastNameA === "" && lastNameB !== "") {
-      return 1; // lastNameA goes after lastNameB
-    } else if (lastNameA !== "" && lastNameB === "") {
-      return -1; // lastNameA goes before lastNameB
-    } else {
-      // Both have last names or both are empty; use localeCompare
-      return lastNameA.localeCompare(lastNameB);
-    }
-  })
-  .map(([memberName, guests]) => {
-    const split = memberName.split(' ')
-    let row = []
-    if (split.length==2) {
-      row.push(split[1], split[0])
-    } else {
-      row.push("", split[0])
-    }
-    guests.map((guest)=>{
-      row.push(guest)
-    })
-    transformedData.push(row)
+    });
   });
-  // Loop through the members list
-// members.forEach((memberName) => {
-//   const guests = memberDict[memberName] || []; // If no entry in memberDict, guests is empty
 
-//   // Split the member name to extract first and last names
-//   const split = memberName.split(' ');
-//   let row = [];
+  const maxGuests = 10
 
-//   if (split.length === 2) {
-//     // Assuming full names are two words: Last Name, First Name
-//     row.push(split[1], split[0]);
-//   } else {
-//     // For names with a single word, push empty Last Name
-//     row.push("", split[0]);
-//   }
+  const header = ["Last Name", "First Name"];
+  for (let i = 1; i <= maxGuests; i++) {
+    header.push(`GUEST #${i}`);
+  }
+  const transformedData: string[][] = [];
+  transformedData.push(header);
+  
+  // Sort by member last name and create rows
+  Object.entries(memberDict)
+    .sort(([memberNameA], [memberNameB]) => {
+      const lastNameA = memberNameA.split(" ").slice(-1)[0];
+      const lastNameB = memberNameB.split(" ").slice(-1)[0];
 
-//   // Add guests or empty strings if no guests
-//   row.push(guests[0] || "", guests[1] || "");
-
-//   // Add the row to transformedData
-//   transformedData.push(row);
-// });
-
-// // Sort by Last Name as before
-// transformedData.sort(([lastNameA], [lastNameB]) => {
-//   // Compare the last names for sorting
-//   if (lastNameA === "" && lastNameB !== "") {
-//     return 1; // lastNameA goes after lastNameB
-//   } else if (lastNameA !== "" && lastNameB === "") {
-//     return -1; // lastNameA goes before lastNameB
-//   } else {
-//     return lastNameA.localeCompare(lastNameB);
-//   }
-// });
+      if (lastNameA === "" && lastNameB !== "") {
+        return 1;
+      } else if (lastNameA !== "" && lastNameB === "") {
+        return -1;
+      } else {
+        return lastNameA.localeCompare(lastNameB);
+      }
+    })
+    .forEach(([memberName, guests]) => {
+      const split = memberName.split(' ');
+      const row: string[] = [];
+      if (split.length === 2) {
+        row.push(split[1], split[0]); // Last Name, First Name
+      } else {
+        row.push("", split[0]);
+      }
+      for (let i = 0; i < maxGuests; i++) {
+        row.push(guests[i] || "");
+      }
+      
+      transformedData.push(row);
+    });
+  
   // Convert to CSV
   const csv = Papa.unparse(transformedData);
   return csv;
 }
 
 function transformPersonsIntoCSV(data: Person[]): string {
-  // Sort data by last name
-  const sortedData = data.sort((a, b) => {
+  const allGuests: { lastName: string; firstName: string }[] = [];
+
+  data.forEach((person) => {
+    const guestFields = [
+      person.guestOne,
+      person.guestTwo,
+      person.guestThree,
+      person.guestFour,
+      person.guestFive,
+      person.guestSix,
+      person.guestSeven,
+      person.guestEight,
+      person.guestNine,
+      person.guestTen
+    ];
+
+    guestFields.forEach((guest) => {
+      if (guest && guest.trim()) {
+        const nameParts = guest.trim().split(' ');
+        if (nameParts.length >= 2) {
+          const firstName = nameParts[0];
+          const lastName = nameParts.slice(1).join(' ');
+          allGuests.push({ lastName, firstName });
+        } else if (nameParts.length === 1) {
+          allGuests.push({ lastName: "", firstName: nameParts[0] });
+        }
+      }
+    });
+  });
+
+  const sortedData = allGuests.sort((a, b) => {
     if (!a.lastName) return 1; // Stick at the end if lastName is empty
     if (!b.lastName) return -1; // Stick at the end if lastName is empty
     const lastNameA = a.lastName.toLowerCase();
@@ -128,13 +172,10 @@ function transformPersonsIntoCSV(data: Person[]): string {
     return lastNameA.localeCompare(lastNameB);
   });
 
-  // Filter out members (those with invitedBy as null or "n/a")
-  const filteredData = sortedData.filter((person) => person.invitedBy !== null && person.invitedBy !== "n/a");
-
   const rowsPerPage = 43;
   const colsPerPage = 3;
   const numRepetitions = Math.ceil(
-    filteredData.length / (rowsPerPage * colsPerPage)
+    sortedData.length / (rowsPerPage * colsPerPage)
   );
   const totalRows = rowsPerPage * numRepetitions;
   const transformedData = [];
@@ -150,8 +191,8 @@ function transformPersonsIntoCSV(data: Person[]): string {
         j * rowsPerPage +
         (i % rowsPerPage) +
         currentPage * rowsPerPage * colsPerPage;
-      if (index < filteredData.length) {
-        const item = filteredData[index];
+      if (index < sortedData.length) {
+        const item = sortedData[index];
         row.push(item.lastName, item.firstName);
       } else {
         row.push("", "");
